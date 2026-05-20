@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="author" content="L.I.E. Arturo Palacios González" />
+
+    <title>Portal de Despedida - CGB</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+
+        body{
+            margin:0;
+            overflow:hidden;
+            font-family:sans-serif;
+            background:#050816;
+        }
+
+        /* ==========================================
+           PANTALLA INTRO
+        ========================================== */
+
+        #introScreen{
+
+            position:fixed;
+            inset:0;
+
+            z-index:200;
+
+            display:flex;
+            flex-direction:column;
+
+            align-items:center;
+            justify-content:center;
+
+            overflow:hidden;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #050816 0%,
+                    #101935 45%,
+                    #1b0f1f 100%
+                );
+
+        }
+
+        /* ==========================================
+           GLOWS
+        ========================================== */
+
+        .bgGlow1{
+
+            position:absolute;
+
+            width:350px;
+            height:350px;
+
+            border-radius:9999px;
+
+            background:rgba(235,94,36,0.25);
+
+            filter:blur(80px);
+
+            top:-100px;
+            left:-100px;
+
+            animation:pulseGlow 5s ease-in-out infinite;
+
+        }
+
+        .bgGlow2{
+
+            position:absolute;
+
+            width:350px;
+            height:350px;
+
+            border-radius:9999px;
+
+            background:rgba(211,18,39,0.25);
+
+            filter:blur(80px);
+
+            bottom:-100px;
+            right:-100px;
+
+            animation:pulseGlow 5s ease-in-out infinite;
+
+        }
+
+        @keyframes pulseGlow{
+
+            0%,100%{
+
+                transform:scale(1);
+                opacity:.7;
+
+            }
+
+            50%{
+
+                transform:scale(1.12);
+                opacity:1;
+
+            }
+
+        }
+
+        /* ==========================================
+           CONTENEDOR LOGO
+        ========================================== */
+
+        .logoWrapper{
+
+            position:relative;
+
+            display:flex;
+
+            align-items:center;
+            justify-content:center;
+
+            margin-bottom:45px;
+
+        }
+
+        /* ==========================================
+           ANILLO
+        ========================================== */
+
+        .logoRing{
+
+            position:absolute;
+
+            width:310px;
+            height:310px;
+
+            border-radius:9999px;
+
+            border:2px solid rgba(235,94,36,.18);
+
+            box-shadow:
+                0 0 35px rgba(235,94,36,.25),
+                inset 0 0 25px rgba(235,94,36,.12);
+
+            animation:rotateRing 16s linear infinite;
+
+        }
+
+        @keyframes rotateRing{
+
+            from{
+
+                transform:rotate(0deg);
+
+            }
+
+            to{
+
+                transform:rotate(360deg);
+
+            }
+
+        }
+
+        /* ==========================================
+           PANEL LOGO
+        ========================================== */
+
+        .logoPanel{
+
+            position:relative;
+
+            width:260px;
+            height:260px;
+
+            border-radius:36px;
+
+            display:flex;
+
+            align-items:center;
+            justify-content:center;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(255,255,255,.10),
+                    rgba(255,255,255,.04)
+                );
+
+            backdrop-filter:blur(16px);
+
+            border:1px solid rgba(255,255,255,.12);
+
+            box-shadow:
+                0 0 45px rgba(235,94,36,.18),
+                0 0 80px rgba(211,18,39,.10),
+                inset 0 0 30px rgba(255,255,255,.03);
+
+            animation:floatLogo 4s ease-in-out infinite;
+
+        }
+
+        @keyframes floatLogo{
+
+            0%,100%{
+
+                transform:translateY(0px);
+
+            }
+
+            50%{
+
+                transform:translateY(-10px);
+
+            }
+
+        }
+
+        /* ==========================================
+           IMAGEN
+        ========================================== */
+
+        .logoImage{
+
+            width:215px;
+
+            filter:
+                drop-shadow(0 0 15px rgba(235,94,36,.35))
+                drop-shadow(0 0 35px rgba(211,18,39,.25));
+
+        }
+
+        /* ==========================================
+           BOTÓN
+        ========================================== */
+
+        #startBtn{
+
+            background:#232f65;
+
+            color:white;
+
+            border:none;
+
+            padding:16px 32px;
+
+            border-radius:20px;
+
+            font-size:18px;
+            font-weight:700;
+
+            letter-spacing:.12em;
+
+            cursor:pointer;
+
+            transition:.3s;
+
+            box-shadow:
+                0 10px 30px rgba(0,0,0,.35);
+
+            display:flex;
+
+            align-items:center;
+            gap:12px;
+
+            position:relative;
+
+            z-index:5;
+
+        }
+
+        #startBtn:hover{
+
+            transform:scale(1.05);
+
+            background:#1a234b;
+
+        }
+
+        /* ==========================================
+           LOADING
+        ========================================== */
+
+        #loadingAnim{
+
+            display:none;
+
+            flex-direction:column;
+
+            align-items:center;
+
+            margin-top:28px;
+
+            z-index:5;
+
+        }
+
+        .loadingDots{
+
+            display:flex;
+            gap:12px;
+
+        }
+
+        .dot{
+
+            width:14px;
+            height:14px;
+
+            border-radius:9999px;
+
+            animation:pulseDot 1.5s infinite ease-in-out;
+
+        }
+
+        .dot1{ background:#eb5e24; }
+        .dot2{
+            background:#d31227;
+            animation-delay:.2s;
+        }
+
+        .dot3{
+            background:#232f65;
+            animation-delay:.4s;
+        }
+
+        @keyframes pulseDot{
+
+            0%,100%{
+
+                transform:scale(.8);
+                opacity:.4;
+
+            }
+
+            50%{
+
+                transform:scale(1.2);
+                opacity:1;
+
+            }
+
+        }
+
+        /* ==========================================
+           TEXTO LOADING
+        ========================================== */
+
+        .loadingText{
+
+            color:white;
+
+            margin-top:18px;
+
+            font-size:13px;
+
+            font-weight:700;
+
+            letter-spacing:.25em;
+
+            text-transform:uppercase;
+
+        }
+
+        /* ==========================================
+           ALERTA
+        ========================================== */
+
+        #customAlert{
+
+            display:none;
+
+            position:fixed;
+
+            bottom:30px;
+            left:50%;
+
+            transform:translateX(-50%);
+
+            background:#dc2626;
+
+            color:white;
+
+            padding:14px 22px;
+
+            border-radius:14px;
+
+            font-size:14px;
+
+            font-weight:700;
+
+            box-shadow:
+                0 10px 30px rgba(0,0,0,.35);
+
+            z-index:300;
+
+        }
+
+        /* ==========================================
+           FADE OUT
+        ========================================== */
+
+        .fade-out{
+
+            animation:fadeOutAnim .8s ease forwards;
+
+        }
+
+        @keyframes fadeOutAnim{
+
+            to{
+
+                opacity:0;
+                visibility:hidden;
+
+            }
+
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <!-- ==========================================
+         AUDIO
+    ========================================== -->
+
+    <audio id="dragonAudio" preload="auto" playsinline>
+        <source src="./dragon.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- ==========================================
+         INTRO SCREEN
+    ========================================== -->
+
+    <div id="introScreen">
+
+        <!-- GLOWS -->
+        <div class="bgGlow1"></div>
+        <div class="bgGlow2"></div>
+
+        <!-- LOGO -->
+        <div class="logoWrapper">
+
+            <div class="logoRing"></div>
+
+            <div class="logoPanel">
+
+                <img
+                    src="./guardianes.png"
+                    alt="Guardianes"
+                    class="logoImage"
+                >
+
+            </div>
+
+        </div>
+
+        <!-- BOTÓN -->
+        <button id="startBtn">
+
+            <span>TERRITORIO GUARDIAN</span>
+
+            <span style="font-size:26px;">🐉</span>
+
+        </button>
+
+        <!-- LOADING -->
+        <div id="loadingAnim">
+
+            <div class="loadingDots">
+
+                <div class="dot dot1"></div>
+                <div class="dot dot2"></div>
+                <div class="dot dot3"></div>
+
+            </div>
+
+            <div class="loadingText">
+
+                ACTIVANDO SISTEMA...
+
+            </div>
+
+        </div>
+
+        <!-- ALERTA -->
+        <div id="customAlert">
+
+            No se encontró dragon.mp3
+
+        </div>
+
+    </div>
+
+    <!-- ==========================================
+         SCRIPT AUDIO + VIBRACIÓN
+    ========================================== -->
+
+    <script>
+
+        const startBtn = document.getElementById('startBtn');
+
+        startBtn.addEventListener('click', async function(){
+
+            /* ==========================================
+               VIBRACIÓN
+            ========================================== */
+
+            if(navigator.vibrate){
+
+                navigator.vibrate([
+                    200,
+                    100,
+                    300,
+                    100,
+                    500
+                ]);
+
+            }
+
+            /* ==========================================
+               AUDIO
+            ========================================== */
+
+            const audio = document.getElementById('dragonAudio');
+
+            try{
+
+                audio.load();
+
+                audio.currentTime = 0;
+
+                audio.volume = 1;
+
+                await audio.play();
+
+                console.log("Audio iniciado correctamente");
+
+            }catch(error){
+
+                console.error(error);
+
+                const alertBox =
+                    document.getElementById('customAlert');
+
+                alertBox.style.display = 'block';
+
+                setTimeout(()=>{
+
+                    alertBox.style.display = 'none';
+
+                },4000);
+
+            }
+
+            /* ==========================================
+               UI
+            ========================================== */
+
+            startBtn.style.display = 'none';
+
+            document
+                .getElementById('loadingAnim')
+                .style.display = 'flex';
+
+            /* ==========================================
+               TRANSICIÓN
+            ========================================== */
+
+            setTimeout(()=>{
+
+                const intro =
+                    document.getElementById('introScreen');
+
+                intro.classList.add('fade-out');
+
+                setTimeout(()=>{
+
+                    intro.remove();
+
+                    document.body.style.overflow='auto';
+
+                },800);
+
+            },4500);
+
+        });
+
+    </script>
+
+</body>
+</html>
