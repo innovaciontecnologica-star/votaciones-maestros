@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="author" content="L.I.E. Arturo Palacios González"/>
+
+<title>Portal de Despedida - CGB</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+body{
+    margin:0;
+    overflow-x:hidden;
+    background:#0a0f2c;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+/* =========================================
+CORTINILLA
+========================================= */
+
+#introScreen{
+    position:fixed;
+    inset:0;
+    z-index:9999;
+    background:
+    radial-gradient(circle at center,#1d2b74 0%,#090d22 60%,#000 100%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    overflow:hidden;
+}
+
+.energy-ring{
+    position:absolute;
+    width:380px;
+    height:380px;
+    border-radius:50%;
+    border:2px solid rgba(235,94,36,.35);
+    animation:spin 12s linear infinite;
+    box-shadow:
+    0 0 40px rgba(235,94,36,.6),
+    inset 0 0 40px rgba(211,18,39,.35);
+}
+
+.energy-ring::after{
+    content:'';
+    position:absolute;
+    inset:25px;
+    border-radius:50%;
+    border:2px solid rgba(211,18,39,.35);
+}
+
+@keyframes spin{
+    from{transform:rotate(0deg);}
+    to{transform:rotate(360deg);}
+}
+
+.logo-card{
+    position:relative;
+    width:320px;
+    max-width:85vw;
+    padding:18px;
+    border-radius:35px;
+    background:
+    linear-gradient(
+    145deg,
+    rgba(255,255,255,.14),
+    rgba(255,255,255,.03)
+    );
+
+    backdrop-filter:blur(18px);
+
+    border:1px solid rgba(255,255,255,.15);
+
+    box-shadow:
+    0 0 60px rgba(235,94,36,.35),
+    0 0 120px rgba(211,18,39,.15);
+
+    animation:floatCard 4s ease-in-out infinite;
+}
+
+@keyframes floatCard{
+    0%,100%{
+        transform:translateY(0px);
+    }
+    50%{
+        transform:translateY(-10px);
+    }
+}
+
+.logo-card img{
+    width:100%;
+    display:block;
+    filter:
+    drop-shadow(0 0 25px rgba(255,255,255,.3))
+    drop-shadow(0 0 30px rgba(235,94,36,.45));
+}
+
+.glow-orb{
+    position:absolute;
+    width:16px;
+    height:16px;
+    border-radius:50%;
+    background:#ff8a4d;
+    box-shadow:0 0 25px #ff8a4d;
+    animation:orbMove 5s infinite alternate ease-in-out;
+}
+
+.glow-orb:nth-child(1){
+    top:-15px;
+    left:40px;
+}
+
+.glow-orb:nth-child(2){
+    bottom:-10px;
+    right:50px;
+    animation-delay:1.5s;
+}
+
+@keyframes orbMove{
+    from{
+        transform:translateY(0px) scale(1);
+    }
+    to{
+        transform:translateY(-25px) scale(1.3);
+    }
+}
+
+#startBtn{
+    margin-top:35px;
+    background:linear-gradient(90deg,#eb5e24,#d31227);
+    color:white;
+    border:none;
+    padding:16px 34px;
+    border-radius:18px;
+    font-size:1.1rem;
+    font-weight:bold;
+    cursor:pointer;
+    transition:.3s;
+    box-shadow:0 0 25px rgba(211,18,39,.45);
+}
+
+#startBtn:hover{
+    transform:scale(1.05);
+}
+
+#loadingAnim{
+    display:none;
+    margin-top:25px;
+    text-align:center;
+    color:white;
+}
+
+.loader{
+    width:70px;
+    height:70px;
+    border:6px solid rgba(255,255,255,.1);
+    border-top:6px solid #eb5e24;
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+    margin:auto;
+}
+
+.fade-out{
+    animation:fadeOut .9s forwards;
+}
+
+@keyframes fadeOut{
+    to{
+        opacity:0;
+        visibility:hidden;
+    }
+}
+
+/* =========================================
+APP
+========================================= */
+
+.hidden{
+    display:none !important;
+}
+
+.screen{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+}
+
+.card{
+    width:100%;
+    max-width:500px;
+    background:#1e1e1e;
+    border-radius:28px;
+    overflow:hidden;
+    box-shadow:0 0 30px rgba(0,0,0,.5);
+}
+
+.header{
+    background:#04044d;
+    padding:40px 25px;
+    text-align:center;
+    color:white;
+}
+
+.content{
+    padding:30px;
+}
+
+input,select{
+    width:100%;
+    padding:18px;
+    border-radius:16px;
+    border:1px solid #555;
+    background:#3f3f3f;
+    color:white;
+    font-size:1rem;
+    margin-top:10px;
+    margin-bottom:25px;
+}
+
+button.main-btn{
+    width:100%;
+    padding:18px;
+    border:none;
+    border-radius:16px;
+    background:#c60019;
+    color:white;
+    font-size:1.2rem;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button.main-btn:hover{
+    background:#9f0014;
+}
+
+#errorMessage{
+    margin-top:20px;
+    padding:18px;
+    border-radius:16px;
+    background:#2c1616;
+    color:#ff8080;
+    text-align:center;
+    border:1px solid #7d3a3a;
+}
+
+.success{
+    color:#76ff76;
+    text-align:center;
+    font-size:1.1rem;
+    font-weight:bold;
+}
+
+.topbar{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:8px;
+    display:flex;
+    z-index:1000;
+}
+
+.topbar div:nth-child(1){background:#eb5e24;flex:1;}
+.topbar div:nth-child(2){background:#d31227;flex:1;}
+.topbar div:nth-child(3){background:#232f65;flex:1;}
+
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+    <div></div>
+    <div></div>
+    <div></div>
+</div>
+
+<!-- AUDIO -->
+<audio id="dragonAudio" preload="auto" playsinline>
+    <source src="./dragon.mp3" type="audio/mpeg">
+</audio>
+
+<!-- =========================================
+CORTINILLA
+========================================= -->
+
+<div id="introScreen">
+
+    <div class="energy-ring"></div>
+
+    <div class="logo-card">
+        <div class="glow-orb"></div>
+        <div class="glow-orb"></div>
+
+        <img src="./guardianes.png" alt="Guardianes CGB">
+    </div>
+
+    <button id="startBtn">
+        TERRITORIO GUARDIÁN 🐉
+    </button>
+
+    <div id="loadingAnim">
+        <div class="loader"></div>
+        <p style="margin-top:15px;font-weight:bold;letter-spacing:2px;">
+            ACTIVANDO SISTEMA...
+        </p>
+    </div>
+
+</div>
+
+<!-- =========================================
+MENU PRINCIPAL
+========================================= -->
+
+<div id="mainMenuScreen" class="screen hidden">
+
+    <div class="card">
+
+        <div class="header">
+            <h1 style="font-size:2rem;font-weight:bold;">
+                Colegio CGB
+            </h1>
+
+            <p style="margin-top:10px;">
+                Portal de Despedida
+            </p>
+        </div>
+
+        <div class="content">
+
+            <button class="main-btn"
+            onclick="showScreen('votingScreen')">
+                🎓 SOY ALUMNO
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- =========================================
+VOTACIÓN
+========================================= -->
+
+<div id="votingScreen" class="screen hidden">
+
+<div class="card">
+
+<div class="header">
+
+<h1 style="font-size:2rem;font-weight:bold;">
+🎓 Tu Voto
+</h1>
+
+<p style="margin-top:10px;">
+Elige al maestro que dará el último pase de lista.
+</p>
+
+</div>
+
+<div class="content">
+
+<form id="voteForm">
+
+<label style="color:white;font-weight:bold;">
+Correo Institucional
+</label>
+
+<input
+type="email"
+id="email"
+placeholder="ejemplo@cgb.edu.mx"
+required
+/>
+
+<label style="color:white;font-weight:bold;">
+Maestro Nominado
+</label>
+
+<select id="maestro" required>
+
+<option value="">Selecciona...</option>
+
+<option>Karla — Español</option>
+<option>Cecilia — Matemáticas</option>
+<option>Laura — Ciencias</option>
+<option>Ariadna — Historia</option>
+<option>Bibiana — Formación Cívica</option>
+<option>Arturo — Tecnología</option>
+<option>Israel — Inglés</option>
+<option>Sara — Inglés</option>
+<option>Branda — Inglés</option>
+<option>Nadia — Inglés</option>
+<option>Diana — Ed. Física</option>
+<option>Tania — Ed. Física</option>
+<option>Ricardo — Ed. Física</option>
+<option>Antonio — Artes</option>
+<option>Yaritza — Artes</option>
+<option>Pilar — Artes</option>
+<option>Mariana — Artes</option>
+<option>Ivonne — Artes</option>
+<option>Sarai — Francés</option>
+
+</select>
+
+<button class="main-btn" id="submitBtn" type="submit">
+Enviar mi voto
+</button>
+
+</form>
+
+<div id="successMessage" class="hidden success">
+✅ Tu voto fue registrado correctamente
+</div>
+
+<div id="errorMessage" class="hidden">
+Error
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+/* =========================================
+URL NUEVA GOOGLE SCRIPT
+========================================= */
+
+const SCRIPT_URL =
+'https://script.google.com/macros/s/AKfycbzG9GRnr9Mcb7hYrO1OiLDngzYDqiZooMKTG4tn3BGpZ-hKARsFYhDieYKpMxDAPJIjBQ/exec';
+
+/* =========================================
+AUDIO
+========================================= */
+
+document.getElementById('startBtn')
+.addEventListener('click', async function(){
+
+    if(navigator.vibrate){
+        navigator.vibrate([200,100,300]);
+    }
+
+    const audio = document.getElementById('dragonAudio');
+
+    try{
+
+        audio.volume = 1;
+        audio.currentTime = 0;
+
+        await audio.play();
+
+    }catch(e){
+
+        console.log("Audio bloqueado",e);
+
+    }
+
+    this.style.display='none';
+
+    document.getElementById('loadingAnim')
+    .style.display='block';
+
+    setTimeout(()=>{
+
+        document.getElementById('introScreen')
+        .classList.add('fade-out');
+
+        setTimeout(()=>{
+
+            document.getElementById('introScreen')
+            .style.display='none';
+
+            showScreen('mainMenuScreen');
+
+        },900);
+
+    },4000);
+
+});
+
+/* =========================================
+NAVEGACIÓN
+========================================= */
+
+function showScreen(id){
+
+    document.querySelectorAll('.screen')
+    .forEach(s=>s.classList.add('hidden'));
+
+    document.getElementById(id)
+    .classList.remove('hidden');
+}
+
+/* =========================================
+FORMULARIO
+========================================= */
+
+document.getElementById('voteForm')
+.addEventListener('submit', async function(e){
+
+e.preventDefault();
+
+const email =
+document.getElementById('email')
+.value.trim().toLowerCase();
+
+const maestro =
+document.getElementById('maestro').value;
+
+const errorBox =
+document.getElementById('errorMessage');
+
+const successBox =
+document.getElementById('successMessage');
+
+errorBox.classList.add('hidden');
+successBox.classList.add('hidden');
+
+if(!email.endsWith('@cgb.edu.mx')){
+
+    errorBox.innerHTML =
+    'Debes usar tu correo institucional';
+
+    errorBox.classList.remove('hidden');
+
+    return;
+}
+
+try{
+
+    const formData = new FormData();
+
+    formData.append('email',email);
+    formData.append('maestro',maestro);
+
+    const response = await fetch(SCRIPT_URL,{
+        method:'POST',
+        body:formData
+    });
+
+    const data = await response.json();
+
+    console.log(data);
+
+    if(data.status === 'exito'){
+
+        successBox.classList.remove('hidden');
+
+        document.getElementById('voteForm')
+        .reset();
+
+    }
+    else if(data.status === 'duplicado'){
+
+        errorBox.innerHTML =
+        'Este correo ya registró un voto';
+
+        errorBox.classList.remove('hidden');
+
+    }
+    else if(data.status === 'invalido'){
+
+        errorBox.innerHTML =
+        'Tu correo no está en el padrón oficial';
+
+        errorBox.classList.remove('hidden');
+
+    }
+    else{
+
+        errorBox.innerHTML =
+        'Error del servidor';
+
+        errorBox.classList.remove('hidden');
+    }
+
+}catch(err){
+
+    console.log(err);
+
+    errorBox.innerHTML =
+    'Error de conexión';
+
+    errorBox.classList.remove('hidden');
+}
+
+});
+
+</script>
+
+</body>
+</html>
