@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="L.I.E. Arturo Palacios González">
+    <title>Portal de Despedida - CGB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Animaciones para la Cortinilla y Loading */
+        .dot-pulse { animation: pulseDot 1.5s infinite ease-in-out; }
+        .dot-delay-1 { animation-delay: 0.2s; }
+        .dot-delay-2 { animation-delay: 0.4s; }
+        @keyframes pulseDot {
+            0%, 100% { transform: scale(0.8); opacity: 0.3; }
+            50% { transform: scale(1.2); opacity: 1; }
+        }
+        .fade-out {
+            animation: fadeOutAnim 0.8s ease-in-out forwards;
+        }
+        @keyframes fadeOutAnim {
+            to { opacity: 0; visibility: hidden; z-index: -1; }
+        }
+    </style>
+</head>
+<body class="bg-[#232f65] min-h-screen font-sans">
+
+    <!-- ETIQUETA DE AUDIO (Precargada y con tipo MIME explícito) -->
+    <!-- Asegúrate de que el archivo en GitHub se llame exactamente dragon.mp3 -->
+    <audio id="dragonAudio" src="dragon.mp3" type="audio/mpeg" preload="auto" playsinline></audio>
+
+    <!-- ========================================== -->
+    <!-- CORTINILLA DE ENTRADA UNIFICADA (Fondo Blanco) -->
+    <!-- ========================================== -->
+    <div id="introScreen" class="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center p-4">
+        
+        <!-- Escudo de Guardianes -->
+        <img src="guardianes.png" alt="Guardianes CGB" class="w-64 md:w-80 lg:w-96 drop-shadow-xl mb-10 transition-transform duration-500 hover:scale-105">
+        
+        <!-- Botón de Interacción (TERRITORIO GUARDIAN) -->
+        <button id="startBtn" class="bg-[#232f65] hover:bg-[#1a234b] text-white px-8 py-4 rounded-2xl font-bold text-xl shadow-lg transition transform hover:scale-105 flex items-center gap-3 border-2 border-transparent hover:border-[#eb5e24]">
+            <span class="uppercase tracking-widest text-lg">Territorio Guardian</span>
+            <span class="text-2xl">🐉</span>
+        </button>
+
+        <!-- Indicador de Carga (Se muestra tras hacer clic) -->
+        <div id="loadingAnim" class="hidden flex-col items-center mt-4">
+            <div class="flex items-center justify-center space-x-3">
+                <div class="w-4 h-4 bg-[#eb5e24] rounded-full dot-pulse"></div>
+                <div class="w-4 h-4 bg-[#d31227] rounded-full dot-pulse dot-delay-1"></div>
+                <div class="w-4 h-4 bg-[#232f65] rounded-full dot-pulse dot-delay-2"></div>
+            </div>
+            <p class="text-[#232f65] text-sm mt-4 font-bold tracking-widest uppercase">Activando sistema...</p>
+        </div>
+
+    </div>
+
+    <!-- BARRA SUPERIOR COLORES CGB -->
+    <div class="flex h-2 w-full fixed top-0 z-50">
+        <div class="bg-[#eb5e24] w-1/3"></div>
+        <div class="bg-[#d31227] w-1/3"></div>
+        <div class="bg-[#232f65] w-1/3"></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- PANTALLA 1: MENÚ PRINCIPAL -->
+    <!-- ========================================== -->
+    <div id="mainMenuScreen" class="min-h-screen flex items-center justify-center p-4">
+        <div class="max-w-md w-full bg-white rounded-2xl shadow-2xl overflow-hidden p-8 text-center transition-all">
+            <h1 class="text-3xl font-bold text-[#232f65] mb-2">Colegio CGB</h1>
+            <p class="text-gray-500 mb-8">Portal de Despedida de Generación</p>
+            
+            <h2 class="text-lg font-semibold text-gray-700 mb-4">Selecciona tu perfil para ingresar:</h2>
+            
+            <div class="space-y-4">
+                <button onclick="showScreen('votingScreen')" class="w-full border-2 border-[#232f65] hover:bg-[#232f65] hover:text-white text-[#232f65] font-bold py-4 rounded-xl transition duration-200 flex items-center justify-center gap-3">
+                    <span class="text-2xl">🎓</span> Soy Alumno (Votar)
+                </button>
+                <button onclick="openLogin('admin')" class="w-full border-2 border-gray-300 hover:border-[#eb5e24] hover:bg-[#eb5e24] hover:text-white text-gray-600 font-semibold py-3 rounded-xl transition duration-200 flex items-center justify-center gap-3">
+                    <span class="text-xl">⚙️</span> Perfil Administrativo
+                </button>
+                <button onclick="openLogin('director')" class="w-full border-2 border-gray-300 hover:border-[#d31227] hover:bg-[#d31227] hover:text-white text-gray-600 font-semibold py-3 rounded-xl transition duration-200 flex items-center justify-center gap-3">
+                    <span class="text-xl">📊</span> Perfil Directivo
+                </button>
+            </div>
+
+            <div class="mt-10 pt-4 border-t border-gray-100 text-xs text-gray-400">
+                Diseñado y desarrollado por <span class="font-semibold text-[#232f65]">L.I.E. Arturo Palacios González</span><br>
+                Innovación Educativa | Colegio Gran Bretaña<br>
+                <span class="mt-2 inline-block font-mono text-[10px] bg-gray-100 px-2 py-1 rounded text-gray-500">v1.5</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- PANTALLA 2: LOGIN (ADMIN/DIRECTOR) -->
+    <!-- ========================================== -->
+    <div id="loginScreen" class="hidden min-h-screen flex items-center justify-center p-4">
+        <div class="max-w-sm w-full bg-white rounded-2xl shadow-2xl overflow-hidden p-8 text-center relative">
+            <button onclick="showScreen('mainMenuScreen')" class="absolute top-4 left-4 text-gray-400 hover:text-[#232f65]">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            </button>
+            <div class="text-[#232f65] mb-4 flex justify-center mt-2">
+                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+            </div>
+            <h2 id="loginTitle" class="text-2xl font-bold text-[#232f65] mb-6">Acceso Restringido</h2>
+            <input type="password" id="passwordInput" placeholder="Contraseña" 
+                   class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#232f65] outline-none mb-4 text-center">
+            <button onclick="checkPassword()" 
+                    class="w-full bg-[#232f65] hover:bg-[#1a234b] text-white font-bold py-3 px-4 rounded-lg transition">
+                Entrar
+            </button>
+            <p id="loginError" class="text-red-500 text-sm mt-3 hidden">Contraseña incorrecta.</p>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- PANTALLA 3: FORMULARIO DE VOTACIÓN -->
+    <!-- ========================================== -->
+    <div id="votingScreen" class="hidden min-h-screen flex items-center justify-center p-4">
+        <div class="max-w-md w-full bg-white rounded-2xl shadow-2xl overflow-hidden relative">
+            <button onclick="showScreen('mainMenuScreen')" class="absolute top-4 left-4 text-white hover:text-gray-300 z-10 transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            </button>
+            
+            <div class="bg-[#1a234b] p-6 text-center text-white pt-10 shadow-inner">
+                <h1 class="text-2xl font-bold mb-2">🎓 Tu Voto</h1>
+                <p class="text-gray-200 text-sm">Elige al maestro que dará el último pase de lista para 3ro de Secundaria.</p>
+            </div>
+
+            <div class="p-6">
+                <form id="voteForm" class="space-y-5">
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Correo Institucional</label>
+                        <input type="email" id="email" required 
+                               class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#232f65] outline-none transition"
+                               placeholder="ejemplo@cgb.edu.mx">
+                        <p class="text-xs text-gray-500 mt-1">Usa tu cuenta de Google del colegio.</p>
+                    </div>
+
+                    <div>
+                        <label for="maestro" class="block text-sm font-medium text-gray-700 mb-1">Maestro Nominado</label>
+                        <select id="maestro" required 
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#232f65] outline-none transition bg-white text-gray-700">
+                            <option value="" disabled selected>Selecciona tu favorito...</option>
+                            <option value="Karla (Español)">Karla (Español)</option>
+                            <option value="Cecilia (Matemáticas)">Cecilia (Matemáticas)</option>
+                            <option value="Laura (Ciencias)">Laura (Ciencias)</option>
+                            <option value="Ariadna (Historia)">Ariadna (Historia)</option>
+                            <option value="Bibiana (Formación Cívica)">Bibiana (Formación Cívica)</option>
+                            <option value="Arturo (Tecnología)">Arturo (Tecnología)</option>
+                            <option value="Israel (Inglés)">Israel (Inglés)</option>
+                            <option value="Sara (Inglés)">Sara (Inglés)</option>
+                            <option value="Branda (Inglés)">Branda (Inglés)</option>
+                            <option value="Nadia (Inglés)">Nadia (Inglés)</option>
+                            <option value="Diana (Ed. Física)">Diana (Ed. Física)</option>
+                            <option value="Tania (Ed. Física)">Tania (Ed. Física)</option>
+                            <option value="Ricardo (Ed. Física)">Ricardo (Ed. Física)</option>
+                            <option value="Antonio (Artes)">Antonio (Artes)</option>
+                            <option value="Yaritza (Artes)">Yaritza (Artes)</option>
+                            <option value="Pilar (Artes)">Pilar (Artes)</option>
+                            <option value="Mariana (Artes)">Mariana (Artes)</option>
+                            <option value="Ivonne (Artes)">Ivonne (Artes)</option>
+                            <option value="Sarai (Francés)">Sarai (Francés)</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" id="submitBtn" 
+                            class="w-full bg-[#d31227] hover:bg-[#b00f20] text-white font-semibold py-3 px-4 rounded-lg shadow-md transition flex justify-center items-center">
+                        <span id="btnText">Enviar mi voto</span>
+                        <svg id="spinner" class="animate-spin ml-2 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </button>
+                </form>
+
+                <div id="successMessage" class="hidden text-center py-6">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 text-green-500 mb-4">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">¡Voto Registrado!</h3>
+                    <p class="text-gray-600 mb-6">Tu elección ha sido guardada con éxito.</p>
+                    <button onclick="showScreen('mainMenuScreen')" class="text-[#232f65] font-semibold hover:underline">Volver al inicio</button>
+                </div>
+                
+                <div id="errorMessage" class="hidden mt-4 p-4 rounded-lg bg-red-50 text-red-600 text-sm text-center border border-red-200">
+                   <span id="errorText">Error.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- PANTALLA 4: DASHBOARD (ADMIN / DIRECTOR) -->
+    <!-- ========================================== -->
+    <div id="dashboardScreen" class="hidden min-h-screen flex flex-col pt-2 bg-gray-100">
+        <header class="bg-[#232f65] text-white p-6 shadow-md relative">
+            <button onclick="showScreen('mainMenuScreen')" class="absolute top-6 left-4 md:left-6 text-gray-300 hover:text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            </button>
+            <div class="max-w-6xl mx-auto flex justify-between items-center pl-8 md:pl-10">
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold">📊 Panel de Resultados</h1>
+                    <p id="dashboardRoleLabel" class="text-sm text-[#eb5e24] font-semibold">Perfil</p>
+                </div>
+                <button onclick="cargarDatos()" class="bg-[#eb5e24] hover:bg-[#d45520] px-3 py-2 md:px-4 rounded-lg text-sm font-semibold transition flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    <span class="hidden md:inline">Actualizar</span>
+                </button>
+            </div>
+        </header>
+
+        <main class="flex-grow p-4 md:p-6 max-w-6xl mx-auto w-full">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-[#232f65]">
+                    <h3 class="text-gray-500 font-semibold mb-1">VOTOS TOTALES REGISTRADOS</h3>
+                    <p id="totalVotos" class="text-4xl font-bold text-[#232f65]">Cargando...</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-[#d31227]">
+                    <h3 class="text-gray-500 font-semibold mb-1">ESTADO DEL SISTEMA</h3>
+                    <p class="text-2xl font-bold text-green-600 flex items-center gap-2">
+                        <span class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
+                        Sistema Activo
+                    </p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-md p-4 md:p-6">
+                <h3 class="text-xl font-bold text-[#232f65] mb-4">Tendencia de Votación</h3>
+                <div class="relative h-72 md:h-96 w-full">
+                    <canvas id="votosChart"></canvas>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SCRIPTS (LÓGICA DE LA APLICACIÓN) -->
+    <!-- ========================================== -->
+    <script>
+        // ==========================================
+        // LÓGICA DE AUDIO Y VIBRACIÓN (Sincrónica y Reforzada)
+        // ==========================================
+        document.getElementById('startBtn').addEventListener('click', function() {
+            
+            // ✅ VIBRACIÓN: Sincrónico, funciona nativo en Android.
+            if (navigator.vibrate) {
+                // Secuencia más agresiva para asegurar que se sienta (rugido del dragón)
+                navigator.vibrate([500, 250, 500, 250, 1000, 200, 1500]);
+            }
+
+            // ✅ AUDIO: Sincrónico. 
+            // Debe llamarse inmediatamente en el evento click para que Apple y Google lo permitan.
+            const audio = document.getElementById('dragonAudio');
+            audio.currentTime = 0;
+            audio.volume = 1.0;
+            
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(err => console.warn("Audio bloqueado por el navegador:", err));
+            }
+
+            // UI: Ocultar el botón y mostrar la animación de carga
+            this.classList.add('hidden');
+            const loader = document.getElementById('loadingAnim');
+            loader.classList.remove('hidden');
+            loader.classList.add('flex');
+
+            // ⏳ RETRASO VISUAL: Le damos 4.5 segundos a la cortinilla para que la experiencia
+            // del rugido y la vibración se complete antes de entrar al menú principal.
+            setTimeout(() => {
+                const introScreen = document.getElementById('introScreen');
+                introScreen.classList.add('fade-out');
+                setTimeout(() => introScreen.remove(), 800);
+            }, 4500);
+        });
+
+        // ==========================================
+        // 👇 PEGA AQUÍ LA URL DE TU APPS SCRIPT 👇
+        // ==========================================
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzfOV5WoBe7ipOoUxzDcsFpfadc6-3sdJvMJKSWQXp6d_QCzYwa0NUc9HBFC_r7rmLqYA/exec';
+        const DOMINIO_INSTITUCIONAL = '@cgb.edu.mx';
+
+        // Variables de navegación y estado
+        const screens = ['mainMenuScreen', 'loginScreen', 'votingScreen', 'dashboardScreen'];
+        let currentLoginRole = '';
+        let miGrafica = null;
+
+        function showScreen(screenId) {
+            screens.forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+            
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('loginError').classList.add('hidden');
+            if(screenId === 'votingScreen'){
+                resetVotingForm();
+            }
+        }
+
+        function openLogin(role) {
+            currentLoginRole = role;
+            const title = role === 'admin' ? 'Acceso Administrativo' : 'Acceso Directivo';
+            document.getElementById('loginTitle').innerText = title;
+            showScreen('loginScreen');
+        }
+
+        function checkPassword() {
+            const pass = document.getElementById('passwordInput').value;
+            const passAdmin = 'ADMIN2026';
+            const passDirector = 'DIR2026';
+
+            if (currentLoginRole === 'admin' && pass === passAdmin) {
+                document.getElementById('dashboardRoleLabel').innerText = "VISTA ADMINISTRADOR";
+                showScreen('dashboardScreen');
+                cargarDatos();
+            } else if (currentLoginRole === 'director' && pass === passDirector) {
+                document.getElementById('dashboardRoleLabel').innerText = "VISTA DIRECTIVA";
+                showScreen('dashboardScreen');
+                cargarDatos();
+            } else {
+                document.getElementById('loginError').classList.remove('hidden');
+            }
+        }
+
+        document.getElementById('passwordInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') checkPassword();
+        });
+
+        const form = document.getElementById('voteForm');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            document.getElementById('errorMessage').classList.add('hidden');
+
+            const email = document.getElementById('email').value.trim().toLowerCase();
+            const maestro = document.getElementById('maestro').value;
+            const btnText = document.getElementById('btnText');
+            const submitBtn = document.getElementById('submitBtn');
+            const spinner = document.getElementById('spinner');
+
+            if (!email || !maestro) return;
+
+            if (!email.endsWith(DOMINIO_INSTITUCIONAL)) {
+                showVotingError(`Por favor, utiliza tu correo institucional (${DOMINIO_INSTITUCIONAL})`);
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+            btnText.textContent = 'Enviando...';
+            spinner.classList.remove('hidden');
+
+            const payload = new URLSearchParams({ email: email, maestro: maestro });
+
+            try {
+                const response = await fetch(SCRIPT_URL, { method: 'POST', body: payload });
+                const result = await response.json();
+
+                if (result.status === 'exito') {
+                    form.classList.add('hidden');
+                    document.getElementById('successMessage').classList.remove('hidden');
+                } else if (result.status === 'duplicado') {
+                    showVotingError("Este correo ya registró un voto. Solo se permite uno.");
+                } else if (result.status === 'invalido') {
+                    showVotingError("Este correo no está en el padrón oficial de 3ro de Secundaria.");
+                } else {
+                    showVotingError("Error al guardar el voto.");
+                }
+            } catch (error) {
+                showVotingError("Error de conexión. Intenta de nuevo.");
+            }
+        });
+
+        function showVotingError(mensaje) {
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+            document.getElementById('btnText').textContent = 'Enviar mi voto';
+            document.getElementById('spinner').classList.add('hidden');
+            document.getElementById('errorText').textContent = mensaje;
+            document.getElementById('errorMessage').classList.remove('hidden');
+        }
+
+        function resetVotingForm() {
+            form.reset();
+            form.classList.remove('hidden');
+            document.getElementById('successMessage').classList.add('hidden');
+            document.getElementById('errorMessage').classList.add('hidden');
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+            document.getElementById('btnText').textContent = 'Enviar mi voto';
+            document.getElementById('spinner').classList.add('hidden');
+        }
+
+        async function cargarDatos() {
+            const btnRefresh = document.querySelector('button[onclick="cargarDatos()"]');
+            const originalText = btnRefresh.innerHTML;
+            btnRefresh.innerHTML = 'Cargando...';
+            btnRefresh.disabled = true;
+
+            try {
+                const response = await fetch(SCRIPT_URL);
+                const data = await response.json();
+
+                if(data.status === 'exito') {
+                    document.getElementById('totalVotos').innerText = data.total;
+                    dibujarGrafica(data.grafica);
+                } else {
+                    alert('Error al leer datos: ' + data.mensaje);
+                }
+            } catch (error) {
+                alert('No se pudo conectar con la base de datos.');
+            } finally {
+                btnRefresh.innerHTML = originalText;
+                btnRefresh.disabled = false;
+            }
+        }
+
+        function dibujarGrafica(datos) {
+            const ctx = document.getElementById('votosChart').getContext('2d');
+            const maestros = Object.keys(datos);
+            const votos = Object.values(datos);
+
+            if (miGrafica) { miGrafica.destroy(); }
+
+            miGrafica = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: maestros,
+                    datasets: [{
+                        label: 'Votos',
+                        data: votos,
+                        backgroundColor: '#232f65',
+                        hoverBackgroundColor: '#d31227',
+                        borderRadius: 6,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
